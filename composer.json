@@ -1,0 +1,29 @@
+{
+    "name": "moesif/moesif-symfony1.4",
+    "type": "library",
+    "description": "Moesif Collection/Data Ingestion Middleware for Symfony1.4",
+    "keywords": ["Moesif", "Log","Debugging","Logging","Symfony","API","Middleware"],
+    "homepage": "https://moesif.com",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "keyur@moesif.com",
+            "email": "keyur@moesif.com",
+            "homepage": "https://www.moesif.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "mashape/unirest-php": "~3.0.1",
+        "apimatic/jsonmapper": "~1.0.0",
+        "symfony/maker-bundle": "^1.11",
+        "doctrine/annotations": "^1.6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~7.0"
+    }
+}
