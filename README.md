@@ -7,9 +7,9 @@ Official SDK for PHP Symfony(1.4) to automatically capture incoming HTTP traffic
 Via Composer
 
 ```bash
-$ composer require moesif/moesif-laravel
+$ composer require moesif/moesif-symfony1.4
 ```
-or add 'moesif/moesif-laravel' to your composer.json file accordingly.
+or add 'moesif/moesif-symfony1.4' to your composer.json file accordingly.
 
 ## Configuration Options
 
