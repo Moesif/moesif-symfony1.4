@@ -35,6 +35,10 @@ Optional, Set `X-Moesif-Company-Id` header in the API request to set the company
 Type: `String`
 Optional, Moesif automatically sessionizes by processing at your data, but you can override this by setting `X-Moesif-Session-Token` header in the API request if you're not happy with the results.
 
+## An Example Symfony 1.4 App with Moesif Integrated
+
+[Moesif Symfony-1.4 Example](https://github.com/Moesif/moesif-symfony1.4-example)
+
 ## Other integrations
 
 To view more documentation on integration options, please visit __[the Integration Options Documentation](https://www.moesif.com/docs/getting-started/integration-options/).__
