@@ -77,14 +77,29 @@ protected function ensureString($item) {
     // Response
     $response = $this->context->getResponse();
 
+    // If Skip is defined, skip sending event to Moesif
+    if(!is_null($request->getHttpHeader('X-Moesif-Skip'))) {
+      if (strpos($request->getUri(), $this->ensureString($request->getHttpHeader('X-Moesif-Skip'))) !== false) {
+        error_log('Skip sending event to Moesif');
+        $this->customLog('[moesif] : Skip sending event to Moesif');
+        return $response;
+      }
+    }
+
     // Configuration Options
     $applicationId = $this->getParameter('applicationId');
     $debug = $this->getParameter('debug');
     $disableTransactionId = $this->getParameter('disableTransactionId') ?: false;
+    $logBody = $this->getParameter('logBody') ?: true;
 
     if (is_null($debug)) {
         $debug = false;
     }
+
+    // Transform config param option
+    $debug = filter_var($debug, FILTER_VALIDATE_BOOLEAN);
+    $disableTransactionId = filter_var($disableTransactionId, FILTER_VALIDATE_BOOLEAN);
+    $logBody = filter_var($logBody, FILTER_VALIDATE_BOOLEAN);
 
     if (is_null($applicationId)) {
         throw new Exception('ApplicationId is missing. Please provide applicationId in moesif.php in config folder.');
@@ -108,6 +123,18 @@ protected function ensureString($item) {
       }
     }
 
+    // Mask Request Headers
+    if(!is_null($requestHeaders['X-MOESIF-MASK-REQUEST-HEADERS'])) {
+      $maskRequestHeaders = explode(',', $requestHeaders['X-MOESIF-MASK-REQUEST-HEADERS']);
+      foreach($maskRequestHeaders as $header){
+          $header = strtoupper(preg_replace('/\s/', '', $header));
+          // Mask header from the array
+          if (array_key_exists($header, $requestHeaders)) {
+            $requestHeaders[$header] = '****';
+        }
+      }
+    }
+
     // Add Transaction Id to the request headers
     if (!$disableTransactionId) {
       if (!is_null((string) $requestHeaders['X-MOESIF-TRANSACTION-ID'] ?? null)) {
@@ -126,12 +153,12 @@ protected function ensureString($item) {
       $requestHeaders['X-Moesif-Transaction-Id'] = $transactionId;
   }
 
-  // Set Request headers
-  $requestData['headers'] = $requestHeaders;
+    // Set Request headers
+    $requestData['headers'] = $requestHeaders;
 
     // Request Body
     $requestContent = $request->getContent();
-    if(!is_null($requestContent)) {
+    if($logBody && !is_null($requestContent)) {
         $requestBody = json_decode($requestContent, true);
         if (is_null($requestBody)) {
           if ($debug) {
@@ -141,8 +168,27 @@ protected function ensureString($item) {
           $requestData['body'] = base64_encode($requestContent);
           $requestData['transfer_encoding'] = 'base64';
         } else {
-          // Set Request body
-          $requestData['body'] = $requestBody;
+          // Mask Request Body
+          if(!is_null($requestHeaders['X-MOESIF-MASK-REQUEST-BODY'])) { 
+            $maskRequestBody = explode(',', $requestHeaders['X-MOESIF-MASK-REQUEST-BODY']);
+            array_walk_recursive($requestBody, function (&$item, $key) use($maskRequestBody) {
+              foreach($maskRequestBody as $header){
+                $header = preg_replace('/\s/', '', $header);
+                // Mask header from the array
+                if ($header == $key) {
+                  $item='****';
+                }
+              }
+            });
+            // Set Request body
+            $requestData['body'] = $requestBody;
+            $requestData['transfer_encoding'] = 'json';
+          }
+          else {
+            // Set Request body
+            $requestData['body'] = $requestBody;
+            $requestData['transfer_encoding'] = 'json';
+          }
         }
     }
 
@@ -175,17 +221,48 @@ protected function ensureString($item) {
       $responseHeaders['X-Moesif-Transaction-Id'] = $transactionId;
     }
 
+    // Mask Response Headers
+    if(!is_null($requestHeaders['X-MOESIF-MASK-RESPONSE-HEADERS'])) {
+      $maskResponseHeaders = explode(',', $requestHeaders['X-MOESIF-MASK-RESPONSE-HEADERS']);
+      foreach($maskResponseHeaders as $header){
+          $header = preg_replace('/\s/', '', $header);
+          // Mask header from the array
+          if (array_key_exists($header, $responseHeaders)) {
+            $responseHeaders[$header] = '****';
+        }
+      }
+    }
+
     // Set Response Headers
     $responseData['headers'] = $responseHeaders;
 
     // Response Body
     $responseContent = $response->getContent();
-    if (!is_null($responseContent)) {
+    if ($logBody && !is_null($responseContent)) {
       $jsonBody = json_decode($response->getContent(), true);
 
       if(!is_null($jsonBody)) {
-          // Set Response Body
-          $responseData['body'] = $jsonBody;
+          // Mask Response Body 
+          if(!is_null($requestHeaders['X-MOESIF-MASK-RESPONSE-BODY'])) { 
+            $maskResponseBody = explode(',', $requestHeaders['X-MOESIF-MASK-RESPONSE-BODY']);
+            array_walk_recursive($jsonBody, function (&$item, $key) use($maskResponseBody) {
+              foreach($maskResponseBody as $header){
+                $header = preg_replace('/\s/', '', $header);
+                // Mask header from the array
+                if ($header == $key) {
+                  $item='****';
+                }
+              }
+            });
+            // Set Response Body
+            $responseData['body'] = $jsonBody;
+            $responseData['transfer_encoding'] = 'json';
+          }
+          else {
+            // Set Response Body
+            $responseData['body'] = $jsonBody;
+            $responseData['transfer_encoding'] = 'json';
+          }
       } else {
           if (!empty($responseContent)) {
               if ($debug) {
