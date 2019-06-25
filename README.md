@@ -2,6 +2,8 @@
 
 Official SDK for PHP Symfony(1.4) to automatically capture incoming HTTP traffic.
 
+[Source Code on GitHub](https://github.com/Moesif/moesif-symfony1.4)
+
 ## How to install
 
 Via Composer
