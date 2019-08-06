@@ -19,6 +19,53 @@ $ composer require moesif/moesif-symfony1.4
 ```
 or add 'moesif/moesif-symfony1.4' to your composer.json file accordingly.
 
+## How to enable MoesifFilter
+
+Create a custom filter `MyCustomFilter` which extends MoesifFilter and you would be able to view all the API calls being captured.
+
+```php
+<?php
+
+use MoesifFilter;
+
+class MyCustomFilter extends MoesifFilter {
+
+}
+```
+
+
+Update the filters.yml files in your application to enable capturing API calls.
+
+`config/filters.yml`
+
+```yaml
+MyCustomFilter:  
+  class: MyCustomFilter
+  param:
+    applicationId: Your Moesif Application Id
+    debug: 'true'
+    logBody: 'true'
+```
+
+`apps/frontend/config/filters.yml`
+
+```yaml
+MyCustomFilter:  
+  class: MyCustomFilter
+  debug: 'true'
+  param:
+    applicationId: Your Moesif Application Id
+    debug: 'true'
+    logBody: 'true'
+```
+
+Your Moesif Application Id can be found in the [_Moesif Portal_](https://www.moesif.com/).
+After signing up for a Moesif account, your Moesif Application Id will be displayed during the onboarding steps. 
+
+You can always find your Moesif Application Id at any time by logging 
+into the [_Moesif Portal_](https://www.moesif.com/), click on the top right menu,
+and then clicking _Installation_.
+
 ## Configuration Options
 
 #### applicationId
@@ -74,53 +121,6 @@ For example - if the request URI is - `http://localhost:8888/index.php` and you'
 #### logBody
 Type: `Boolean`
 Optional, If set to false will not log request and response body to Moesif.
-
-## How to enable MoesifFilter
-
-Create a custom filter `MyCustomFilter` which extends MoesifFilter and you would be able to view all the API calls being captured.
-
-```php
-<?php
-
-use MoesifFilter;
-
-class MyCustomFilter extends MoesifFilter {
-
-}
-```
-
-
-Update the filters.yml files in your application to enable capturing API calls.
-
-`config/filters.yml`
-
-```yaml
-MyCustomFilter:  
-  class: MyCustomFilter
-  param:
-    applicationId: Your Moesif Application Id
-    debug: 'true'
-    logBody: 'true'
-```
-
-`apps/frontend/config/filters.yml`
-
-```yaml
-MyCustomFilter:  
-  class: MyCustomFilter
-  debug: 'true'
-  param:
-    applicationId: Your Moesif Application Id
-    debug: 'true'
-    logBody: 'true'
-```
-
-Your Moesif Application Id can be found in the [_Moesif Portal_](https://www.moesif.com/).
-After signing up for a Moesif account, your Moesif Application Id will be displayed during the onboarding steps. 
-
-You can always find your Moesif Application Id at any time by logging 
-into the [_Moesif Portal_](https://www.moesif.com/), click on the top right menu,
-and then clicking _Installation_.
 
 ## An Example Symfony 1.4 App with Moesif Integrated
 
