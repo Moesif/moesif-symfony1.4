@@ -30,6 +30,29 @@ use MoesifFilter;
 
 class MyCustomFilter extends MoesifFilter {
 
+    /**
+     * Get UserId
+     */
+    public function identifyUserId($request, $response){
+
+        $user = $this->getContext()->getUser();
+        if (!is_null($user)) {
+            $id = $user->getAttribute("id");
+            if (!$this->IsNullOrEmptyString($id)) {
+            return $id ;
+            }
+            return $user->getAttribute("user_id");
+        }
+        return null;
+    }
+
+    /**
+     * Get sessionToken
+     */
+    function identifySessionToken($request, $response){
+        return $request->getHttpHeader('Authorization');
+    }
+
 }
 ```
 
@@ -66,61 +89,59 @@ You can always find your Moesif Application Id at any time by logging
 into the [_Moesif Portal_](https://www.moesif.com/), click on the top right menu,
 and then clicking _Installation_.
 
-## Configuration Options
+## YAML Configuration Options
 
-#### applicationId
+#### __`applicationId`__
 Type: `String`
 Required, a string that identifies your application.
 
-#### debug
+#### __`debug`__
 Type: `Boolean`
 Optional, If true, will print debug messages using [sfFileLogger](http://www.symfony-project.org/api/1_4/sfFileLogger.html)
 
-#### identifyUserId
-Type: `String`
-Optional, (Highly Recommend) Moesif automatically try to obtain end userId, In case you use a non standard way of injecting user, you can do so with by setting `X-Moesif-User-Id` header in the API request.
-
-#### identifyCompanyId
-Type: `String`
-Optional, Set `X-Moesif-Company-Id` header in the API request to set the companyId for the event.
-
-#### identifySessionToken
-Type: `String`
-Optional, Moesif automatically sessionizes by processing at your data, but you can override this by setting `X-Moesif-Session-Token` header in the API request if you're not happy with the results.
-
-#### maskRequestHeaders
-Type: `String`
-Optional, Set `X-Moesif-Mask-Request-Headers` headers, which is a comma seperated string, which will mask your sensitive request headers.
-
-For example - `X-Moesif-Mask-Request-Headers` should be set to `header1, header2` to mask `header1` and `header2` from your API call request header.
-
-#### maskRequestBody
-Type: `String`
-Optional, Set `X-Moesif-Mask-Request-Body` headers, which is a comma seperated string, which will mask your sensitive request body.
-
-For example - `X-Moesif-Mask-Request-Body` should be set to `fieldA, fieldB` to mask `fieldA` and `fieldB` from your API call request body.
-
-#### maskResponseHeaders
-Type: `String`
-Optional, Set `X-Moesif-Mask-Response-Headers` headers, which is a comma seperated string, which will mask your sensitive response headers.
-
-For example - `X-Moesif-Mask-Response-Headers` should be set to `header1, header2` to mask `header1` and `header2` from your API call response header.
-
-#### maskResponseBody
-Type: `String`
-Optional, Set `X-Moesif-Mask-Response-Body` headers, which is a comma seperated string, which will mask your sensitive response body.
-
-For example - `X-Moesif-Mask-Response-Body` should be set to `fieldA, fieldB` to mask `fieldA` and `fieldB` from your API call response body.
-
-#### skip
-Type: `String`
-Optional, Set `X-Moesif-Skip` header in the API request to skip sending a particular event to Moesif if the header value matches the URI for the request.
-
-For example - if the request URI is - `http://localhost:8888/index.php` and you've set the `X-Moesif-Skip` header to `index`, it will skip sending that particular event to Moesif.
-
-#### logBody
+#### __`logBody`__
 Type: `Boolean`
-Optional, If set to false will not log request and response body to Moesif.
+Optional, Default true, Set to false to remove logging request and response body to Moesif.
+
+## Filter Class Configuration Options
+
+#### __`identifyUserId`__
+Type: `($request, $response) => String`
+Optional, a function that takes a $request and $response and return a string for userId. Moesif automatically obtains end userId, In case you use a non standard way of injecting user into $request or want to override userId, you can do so with identifyUserId.
+
+#### __`identifyCompanyId`__
+Type: `($request, $response) => String`
+Optional, a function that takes a $request and $response and return a string for companyId.
+
+#### __`identifySessionToken`__
+Type: `($request, $response) => String`
+Optional, a function that takes a $request and $response and return a string for sessionId. Moesif automatically sessionizes by processing at your data, but you can override this via identifySessionId if you're not happy with the results.
+
+#### __`maskRequestHeaders`__
+Type: `$headers => $headers`
+Optional, a function that takes a $headers, which is an associative array, and
+returns an associative array with your sensitive headers removed/masked.
+
+#### __`maskRequestBody`__
+Type: `$body => $body`
+Optional, a function that takes a $body, which is an associative array representation of JSON, and
+returns an associative array with any information removed.
+
+#### __`maskResponseHeaders`__
+Type: `$headers => $headers`
+Optional, same as above, but for Responses.
+
+#### __`maskResponseBody`__
+Type: `$body => $body`
+Optional, same as above, but for Responses.
+
+#### __`getMetadata`__
+Type: `($request, $response) => Associative Array`
+Optional, a function that takes a $request and $response and returns $metdata which is an associative array representation of JSON.
+
+#### __`skip`__
+Type: `($request, $response) => String`
+Optional, a function that takes a $request and $response and returns true if this API call should be not be sent to Moesif.
 
 ## An Example Symfony 1.4 App with Moesif Integrated
 

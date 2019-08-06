@@ -27,6 +27,82 @@ class MoesifFilter extends sfFilter {
 }
 
 /**
+ * Get UserId
+ */
+public function identifyUserId($request, $response){
+
+  $user = $this->getContext()->getUser();
+  if (!is_null($user)) {
+    $id = $user->getAttribute("id");
+    if (!$this->IsNullOrEmptyString($id)) {
+      return $id ;
+    }
+    return $user->getAttribute("user_id");
+  }
+  return null;
+}
+
+/**
+ * Get companyId
+ */
+public function identifyCompanyId($request, $response){
+  return null;
+}
+
+/**
+ * Get sessionToken
+ */
+public function identifySessionToken($request, $response){
+  return null;
+}
+
+/**
+ * Get metadata
+ */
+public function getMetadata($request, $response){
+  return null;
+}
+
+/**
+ * Skip function
+ */
+public function skip($request, $response){
+  return false;
+}
+
+/**
+ * maskRequestHeaders function
+ */
+public function maskRequestHeaders($headers){
+  return $headers;
+}
+
+/**
+ * maskResponseHeaders function
+ */
+public function maskResponseHeaders($headers){
+  return $headers;
+}
+
+/**
+ * Remove any fields from request body that you don't want to send to Moesif.
+ *
+ * @return body
+ */
+public function maskRequestBody($body) {
+  return $body;
+}
+
+/**
+ * Remove any fields from response body that you don't want to send to Moesif.
+ *
+ * @return body
+ */
+public function maskResponseBody($body) {
+  return $body;
+}
+
+/**
  * Generate GUID.
  */
 function guidv4($data)
@@ -77,13 +153,11 @@ protected function ensureString($item) {
     // Response
     $response = $this->context->getResponse();
 
-    // If Skip is defined, skip sending event to Moesif
-    if(!is_null($request->getHttpHeader('X-Moesif-Skip'))) {
-      if (strpos($request->getUri(), $this->ensureString($request->getHttpHeader('X-Moesif-Skip'))) !== false) {
-        error_log('Skip sending event to Moesif');
-        $this->customLog('[moesif] : Skip sending event to Moesif');
-        return $response;
-      }
+    // If Skip is true, skip sending event to Moesif
+    if($this->skip($request, $response)) {
+      error_log('Skip sending event to Moesif');
+      $this->customLog('[moesif] : Skip sending event to Moesif');
+      return $response;
     }
 
     // Configuration Options
@@ -102,7 +176,7 @@ protected function ensureString($item) {
     $logBody = filter_var($logBody, FILTER_VALIDATE_BOOLEAN);
 
     if (is_null($applicationId)) {
-        throw new Exception('ApplicationId is missing. Please provide applicationId in moesif.php in config folder.');
+        throw new Exception('ApplicationId is missing. Please provide applicationId in filters.yml.');
     }
 
     // Request object
@@ -116,23 +190,18 @@ protected function ensureString($item) {
     // Request Headers
     $requestHeaders = [];
     foreach ($request->getPathInfoArray() as $key => $value) {
-      if( strpos( $key, 'HTTP' ) !== false) {
+      if(strpos( $key, 'HTTP' ) !== false) {
         $key = str_replace('HTTP_','', $key);
         $key = str_replace('_','-', $key);
         $requestHeaders[$key] = (string) $value;
       }
     }
 
-    // Mask Request Headers
-    if(!is_null($requestHeaders['X-MOESIF-MASK-REQUEST-HEADERS'])) {
-      $maskRequestHeaders = explode(',', $requestHeaders['X-MOESIF-MASK-REQUEST-HEADERS']);
-      foreach($maskRequestHeaders as $header){
-          $header = strtoupper(preg_replace('/\s/', '', $header));
-          // Mask header from the array
-          if (array_key_exists($header, $requestHeaders)) {
-            $requestHeaders[$header] = '****';
-        }
-      }
+    // Set/Mask Request Headers
+    if(!is_null($this->maskRequestHeaders($requestHeaders))) {
+        $requestData['headers'] = $this->maskRequestHeaders($requestHeaders);
+    } else {
+        $requestData['headers'] = $requestHeaders;
     }
 
     // Add Transaction Id to the request headers
@@ -153,9 +222,6 @@ protected function ensureString($item) {
       $requestHeaders['X-Moesif-Transaction-Id'] = $transactionId;
   }
 
-    // Set Request headers
-    $requestData['headers'] = $requestHeaders;
-
     // Request Body
     $requestContent = $request->getContent();
     if($logBody && !is_null($requestContent)) {
@@ -169,19 +235,9 @@ protected function ensureString($item) {
           $requestData['transfer_encoding'] = 'base64';
         } else {
           // Mask Request Body
-          if(!is_null($requestHeaders['X-MOESIF-MASK-REQUEST-BODY'])) { 
-            $maskRequestBody = explode(',', $requestHeaders['X-MOESIF-MASK-REQUEST-BODY']);
-            array_walk_recursive($requestBody, function (&$item, $key) use($maskRequestBody) {
-              foreach($maskRequestBody as $header){
-                $header = preg_replace('/\s/', '', $header);
-                // Mask header from the array
-                if ($header == $key) {
-                  $item='****';
-                }
-              }
-            });
+          if(!is_null($this->maskRequestBody($requestBody))) { 
             // Set Request body
-            $requestData['body'] = $requestBody;
+            $requestData['body'] = $this->maskRequestBody($requestBody);
             $requestData['transfer_encoding'] = 'json';
           }
           else {
@@ -233,8 +289,12 @@ protected function ensureString($item) {
       }
     }
 
-    // Set Response Headers
-    $responseData['headers'] = $responseHeaders;
+    // Set/Mask Response Headers
+    if(!is_null($this->maskResponseHeaders($responseHeaders))) {
+        $responseData['headers'] = $this->maskResponseHeaders($responseHeaders);
+    } else {
+        $responseData['headers'] = $responseHeaders;
+    }
 
     // Response Body
     $responseContent = $response->getContent();
@@ -243,19 +303,9 @@ protected function ensureString($item) {
 
       if(!is_null($jsonBody)) {
           // Mask Response Body 
-          if(!is_null($requestHeaders['X-MOESIF-MASK-RESPONSE-BODY'])) { 
-            $maskResponseBody = explode(',', $requestHeaders['X-MOESIF-MASK-RESPONSE-BODY']);
-            array_walk_recursive($jsonBody, function (&$item, $key) use($maskResponseBody) {
-              foreach($maskResponseBody as $header){
-                $header = preg_replace('/\s/', '', $header);
-                // Mask header from the array
-                if ($header == $key) {
-                  $item='****';
-                }
-              }
-            });
+          if (!is_null($this->maskResponseBody($jsonBody))) {
             // Set Response Body
-            $responseData['body'] = $jsonBody;
+            $responseData['body'] = $this->maskResponseBody($jsonBody);
             $responseData['transfer_encoding'] = 'json';
           }
           else {
@@ -286,28 +336,28 @@ protected function ensureString($item) {
     ];
 
     // Session Token
-    if(!is_null($requestHeaders['X-MOESIF-SESSION-TOKEN'])) {
-      $data['session_token'] = $this->ensureString($requestHeaders['X-MOESIF-SESSION-TOKEN']);
+    if(!is_null($this->identifySessionToken($request, $response))) {
+      $data['session_token'] = $this->identifySessionToken($request, $response);
     }
 
     // UserId
-    if(!is_null($requestHeaders['X-MOESIF-USER-ID'])) {
-      $data['user_id'] = $this->ensureString($requestHeaders['X-MOESIF-USER-ID']);
+    if (!is_null($this->identifyUserId($request, $response))) {
+        $data['user_id'] = $this->ensureString($this->identifyUserId($request, $response));
     }
 
     // CompanyId
-    if(!is_null($requestHeaders['X-MOESIF-COMPANY-ID'])) {
-      $data['company_id'] = $this->ensureString($requestHeaders['X-MOESIF-COMPANY-ID']);
+    if(!is_null($this->identifyCompanyId($request, $response))) {
+      $data['company_id'] = $this->ensureString($this->identifyCompanyId($request, $response));
+    }
+
+    // Metadata
+    if(!is_null($this->getMetadata($request, $response))) {
+      $data['metadata'] = $this->getMetadata($request, $response);
     }
 
     // Add transaction Id to the response send to the client
     if (!is_null($transactionId)) {
-      error_log('Before adding');
-      error_log(print_r($response->getHttpHeaders(), TRUE));
       $response->setHttpHeader('X-Moesif-Transaction-Id', $transactionId);
-
-      error_log('After adding response');
-      error_log(print_r($response->getHttpHeaders(), TRUE));
     }
 
     // Send Event to Moesif
