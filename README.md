@@ -2,6 +2,12 @@
 
 Official SDK for PHP Symfony(1.4) to automatically capture incoming HTTP traffic.
 
+[![Built For][ico-built-for]][link-built-for]
+[![Latest Version][ico-version]][link-package]
+[![Total Downloads][ico-downloads]][link-downloads]
+[![Software License][ico-license]][link-license]
+[![Source Code][ico-source]][link-source]
+
 [Source Code on GitHub](https://github.com/Moesif/moesif-symfony1.4)
 
 ## How to install
@@ -69,6 +75,53 @@ For example - if the request URI is - `http://localhost:8888/index.php` and you'
 Type: `Boolean`
 Optional, If set to false will not log request and response body to Moesif.
 
+## How to enable MoesifFilter
+
+Create a custom filter `MyCustomFilter` which extends MoesifFilter and you would be able to view all the API calls being captured.
+
+```php
+<?php
+
+use MoesifFilter;
+
+class MyCustomFilter extends MoesifFilter {
+
+}
+```
+
+
+Update the filters.yml files in your application to enable capturing API calls.
+
+`config/filters.yml`
+
+```yaml
+MyCustomFilter:  
+  class: MyCustomFilter
+  param:
+    applicationId: Your Moesif Application Id
+    debug: 'true'
+    logBody: 'true'
+```
+
+`apps/frontend/config/filters.yml`
+
+```yaml
+MyCustomFilter:  
+  class: MyCustomFilter
+  debug: 'true'
+  param:
+    applicationId: Your Moesif Application Id
+    debug: 'true'
+    logBody: 'true'
+```
+
+Your Moesif Application Id can be found in the [_Moesif Portal_](https://www.moesif.com/).
+After signing up for a Moesif account, your Moesif Application Id will be displayed during the onboarding steps. 
+
+You can always find your Moesif Application Id at any time by logging 
+into the [_Moesif Portal_](https://www.moesif.com/), click on the top right menu,
+and then clicking _Installation_.
+
 ## An Example Symfony 1.4 App with Moesif Integrated
 
 [Moesif Symfony-1.4 Example](https://github.com/Moesif/moesif-symfony1.4-example)
@@ -76,3 +129,15 @@ Optional, If set to false will not log request and response body to Moesif.
 ## Other integrations
 
 To view more documentation on integration options, please visit __[the Integration Options Documentation](https://www.moesif.com/docs/getting-started/integration-options/).__
+
+[ico-built-for]: https://img.shields.io/badge/built%20for-symfony1.4-blue.svg
+[ico-version]: https://img.shields.io/packagist/v/moesif/moesif-symfony1.4.svg
+[ico-downloads]: https://img.shields.io/packagist/dt/moesif/moesif-symfony1.4.svg
+[ico-license]: https://img.shields.io/badge/License-Apache%202.0-green.svg
+[ico-source]: https://img.shields.io/github/last-commit/moesif/moesif-symfony1.4.svg?style=social
+
+[link-built-for]: https://symfony.com/legacy
+[link-package]: https://packagist.org/packages/moesif/moesif-symfony1.4
+[link-downloads]: https://packagist.org/packages/moesif/moesif-symfony1.4
+[link-license]: https://raw.githubusercontent.com/Moesif/moesif-symfony1.4/master/LICENSE
+[link-source]: https://github.com/Moesif/moesif-symfony1.4
