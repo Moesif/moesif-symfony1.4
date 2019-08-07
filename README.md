@@ -70,18 +70,6 @@ MyCustomFilter:
     logBody: 'true'
 ```
 
-`apps/frontend/config/filters.yml`
-
-```yaml
-MyCustomFilter:  
-  class: MyCustomFilter
-  debug: 'true'
-  param:
-    applicationId: Your Moesif Application Id
-    debug: 'true'
-    logBody: 'true'
-```
-
 Your Moesif Application Id can be found in the [_Moesif Portal_](https://www.moesif.com/).
 After signing up for a Moesif account, your Moesif Application Id will be displayed during the onboarding steps. 
 
