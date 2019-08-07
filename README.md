@@ -1,10 +1,9 @@
-## Moesif Symfony(1.4) SDK
+## Moesif Symfony 1.4 SDK
 
-Official SDK for PHP Symfony(1.4) to automatically capture incoming HTTP traffic.
+Official SDK for PHP Symfony 1.x to automatically capture API traffic and send to the Moesif API Analytics platform.
 
 [![Built For][ico-built-for]][link-built-for]
 [![Latest Version][ico-version]][link-package]
-[![Total Downloads][ico-downloads]][link-downloads]
 [![Software License][ico-license]][link-license]
 [![Source Code][ico-source]][link-source]
 
@@ -17,7 +16,7 @@ Via Composer
 ```bash
 $ composer require moesif/moesif-symfony1.4
 ```
-or add 'moesif/moesif-symfony1.4' to your composer.json file accordingly.
+or add `moesif/moesif-symfony1.4` to your composer.json file accordingly.
 
 ## How to enable MoesifFilter
 
@@ -31,23 +30,15 @@ use MoesifFilter;
 class MyCustomFilter extends MoesifFilter {
 
     /**
-     * Get UserId
+     * Example implementation returning the customer's user_id.
      */
     public function identifyUserId($request, $response){
-
         $user = $this->getContext()->getUser();
-        if (!is_null($user)) {
-            $id = $user->getAttribute("id");
-            if (!$this->IsNullOrEmptyString($id)) {
-            return $id ;
-            }
-            return $user->getAttribute("user_id");
-        }
-        return null;
+        return $user->getAttribute("user_id");
     }
 
     /**
-     * Get sessionToken
+     * Example implementation returning the customer's session token/auth token.
      */
     function identifySessionToken($request, $response){
         return $request->getHttpHeader('Authorization');
@@ -57,9 +48,8 @@ class MyCustomFilter extends MoesifFilter {
 ```
 
 
-Update the filters.yml files in your application to enable capturing API calls.
-
-`config/filters.yml`
+Add your filter to the `config/filters.yml` file in your application with
+your Moesif Application Id.
 
 ```yaml
 MyCustomFilter:  
@@ -95,15 +85,15 @@ Optional, Default true, Set to false to remove logging request and response body
 
 #### __`identifyUserId`__
 Type: `($request, $response) => String`
-Optional, a function that takes a $request and $response and return a string for userId. Moesif automatically obtains end userId, In case you use a non standard way of injecting user into $request or want to override userId, you can do so with identifyUserId.
+Optional, a function that takes a $request and $response and return a string for userId. This enables Moesif to attribute API requests to individual unique users so you can understand who calling your API. This can be used simultaneously with `identifyCompanyId` to track both individual customers and also the companies they are a part of.
 
 #### __`identifyCompanyId`__
 Type: `($request, $response) => String`
-Optional, a function that takes a $request and $response and return a string for companyId.
+Optional, a function that takes a $request and $response and return a string for companyId. If your business is B2B, this enables Moesif to attribute API requests to specific companies or organizations so you can understand which accounts are calling your API. This can be used simultaneously with `identifyUserId` to track both individual customers and the companies their a part of.
 
 #### __`identifySessionToken`__
 Type: `($request, $response) => String`
-Optional, a function that takes a $request and $response and return a string for sessionId. Moesif automatically sessionizes by processing at your data, but you can override this via identifySessionId if you're not happy with the results.
+Optional, a function that takes a $request and $response and return a string for session token/auth token. Moesif automatically sessionizes by processing your API data, but you can override this via identifySessionId if you're not happy with the results.
 
 #### __`maskRequestHeaders`__
 Type: `$headers => $headers`
@@ -141,12 +131,10 @@ To view more documentation on integration options, please visit __[the Integrati
 
 [ico-built-for]: https://img.shields.io/badge/built%20for-symfony1.4-blue.svg
 [ico-version]: https://img.shields.io/packagist/v/moesif/moesif-symfony1.4.svg
-[ico-downloads]: https://img.shields.io/packagist/dt/moesif/moesif-symfony1.4.svg
 [ico-license]: https://img.shields.io/badge/License-Apache%202.0-green.svg
 [ico-source]: https://img.shields.io/github/last-commit/moesif/moesif-symfony1.4.svg?style=social
 
 [link-built-for]: https://symfony.com/legacy
 [link-package]: https://packagist.org/packages/moesif/moesif-symfony1.4
-[link-downloads]: https://packagist.org/packages/moesif/moesif-symfony1.4
 [link-license]: https://raw.githubusercontent.com/Moesif/moesif-symfony1.4/master/LICENSE
 [link-source]: https://github.com/Moesif/moesif-symfony1.4
