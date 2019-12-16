@@ -121,6 +121,156 @@ Optional, a function that takes a $request and $response and returns $metdata wh
 Type: `($request, $response) => String`
 Optional, a function that takes a $request and $response and returns true if this API call should be not be sent to Moesif.
 
+**The below methods to update user and company are accessible via the Moesif PHP API lib which Moesif Play Filter already imports as a dependency.**
+
+## Update a Single User
+
+Create or update a user profile in Moesif. 
+The metadata field can be any customer demographic or other info you want to store.
+Only the `user_id` field is required.
+For details, visit the [PHP API Reference](https://www.moesif.com/docs/api?php#update-a-user).
+
+```php
+use MoesifApi\MoesifApiClient;
+$client = new MoesifApiClient("Your Moesif Application Id");
+$api = $client->getApi();
+
+// Campaign object is optional, but useful if you want to track ROI of acquisition channels
+// See https://www.moesif.com/docs/api#update-a-user for campaign schema
+$campaign = new Models\CampaignModel();
+$campaign->utmSource = "google";
+$campaign->utmCampaign = "cpc";
+$campaign->utmMedium = "adwords";
+$campaign->utmContent = "api+tooling";
+$campaign->utmTerm = "landing";
+
+$user = new Models\UserModel();
+$user->userId = "12345";
+$user->companyId = "67890"; // If set, associate user with a company object
+$user->campaign = $campaign;
+
+// metadata can be any custom object
+$user->metadata = array(
+        "email" => "john@acmeinc.com",
+        "first_name" => "John",
+        "last_name" => "Doe",
+        "title" => "Software Engineer",
+        "sales_info" => array(
+            "stage" => "Customer",
+            "lifetime_value" => 24000,
+            "account_owner" => "mary@contoso.com"
+        )
+    );
+
+$api->updateUser($user);
+```
+
+## Update Users in Batch
+
+Similar to updateUser, but used to update a list of users in one batch. 
+Only the `user_id` field is required.
+For details, visit the [PHP API Reference](https://www.moesif.com/docs/api?php#update-users-in-batch).
+
+```php
+use MoesifApi\MoesifApiClient;
+$client = new MoesifApiClient("Your Moesif Application Id");
+$api = $client->getApi();
+
+$userA = new Models\UserModel();
+$userA->userId = "12345";
+$userA->companyId = "67890"; // If set, associate user with a company object
+$userA->campaign = $campaign;
+
+// metadata can be any custom object
+$userA->metadata = array(
+        "email" => "john@acmeinc.com",
+        "first_name" => "John",
+        "last_name" => "Doe",
+        "title" => "Software Engineer",
+        "sales_info" => array(
+            "stage" => "Customer",
+            "lifetime_value" => 24000,
+            "account_owner" => "mary@contoso.com"
+        )
+    );
+
+$users = array($userA)
+$api->updateUsersBatch($user);
+```
+
+## Update a Single Company
+
+Create or update a company profile in Moesif.
+The metadata field can be any company demographic or other info you want to store.
+Only the `company_id` field is required.
+For details, visit the [PHP API Reference](https://www.moesif.com/docs/api?php#update-a-company).
+
+```php
+use MoesifApi\MoesifApiClient;
+$client = new MoesifApiClient("Your Moesif Application Id");
+$api = $client->getApi();
+
+// Campaign object is optional, but useful if you want to track ROI of acquisition channels
+// See https://www.moesif.com/docs/api#update-a-company for campaign schema
+$campaign = new Models\CampaignModel();
+$campaign->utmSource = "google";
+$campaign->utmCampaign = "cpc";
+$campaign->utmMedium = "adwords";
+$campaign->utmContent = "api+tooling";
+$campaign->utmTerm = "landing";
+
+$company = new Models\CompanyModel();
+$company->companyId = "67890";
+$company->companyDomain = "acmeinc.com";
+$company->campaign = $campaign;
+
+// metadata can be any custom object
+$company->metadata = array(
+        "org_name" => "Acme, Inc",
+        "plan_name" => "Free",
+        "deal_stage" => "Lead",
+        "mrr" => 24000,
+        "demographics" => array(
+            "alexa_ranking" => 500000,
+            "employee_count" => 47
+        )
+    );
+
+$api->updateCompany($company);
+```
+
+## Update Companies in Batch
+
+Similar to updateCompany, but used to update a list of companies in one batch. 
+Only the `company_id` field is required.
+For details, visit the [PHP API Reference](https://www.moesif.com/docs/api?php#update-companies-in-batch).
+
+```php
+use MoesifApi\MoesifApiClient;
+$client = new MoesifApiClient("Your Moesif Application Id");
+$api = $client->getApi();
+
+$companyA = new Models\CompanyModel();
+$companyA->companyId = "67890";
+$companyA->companyDomain = "acmeinc.com";
+$companyA->campaign = $campaign;
+
+// metadata can be any custom object
+$companyA->metadata = array(
+        "org_name" => "Acme, Inc",
+        "plan_name" => "Free",
+        "deal_stage" => "Lead",
+        "mrr" => 24000,
+        "demographics" => array(
+            "alexa_ranking" => 500000,
+            "employee_count" => 47
+        )
+    );
+
+$companies = array($companyA)
+$api->updateCompaniesBatch($companies);
+```
+
 ## An Example Symfony 1.4 App with Moesif Integrated
 
 [Moesif Symfony-1.4 Example](https://github.com/Moesif/moesif-symfony1.4-example)
