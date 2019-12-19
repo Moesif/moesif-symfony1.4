@@ -131,9 +131,14 @@ Only the `user_id` field is required.
 For details, visit the [PHP API Reference](https://www.moesif.com/docs/api?php#update-a-user).
 
 ```php
+<?php
+// Depending on your project setup, you might need to include composer's
+// autoloader in your PHP code to enable autoloading of classes.
+require_once "vendor/autoload.php";
+
+// Import the SDK client in your project:
 use MoesifApi\MoesifApiClient;
-$client = new MoesifApiClient("Your Moesif Application Id");
-$api = $client->getApi();
+$apiClient = new MoesifApiClient("YOUR_COLLECTOR_APPLICATION_ID")->getApi();;
 
 // Campaign object is optional, but useful if you want to track ROI of acquisition channels
 // See https://www.moesif.com/docs/api#update-a-user for campaign schema
@@ -143,11 +148,6 @@ $campaign->utmCampaign = "cpc";
 $campaign->utmMedium = "adwords";
 $campaign->utmContent = "api+tooling";
 $campaign->utmTerm = "landing";
-
-$user = new Models\UserModel();
-$user->userId = "12345";
-$user->companyId = "67890"; // If set, associate user with a company object
-$user->campaign = $campaign;
 
 // metadata can be any custom object
 $user->metadata = array(
@@ -162,7 +162,13 @@ $user->metadata = array(
         )
     );
 
-$api->updateUser($user);
+$user = new Models\UserModel();
+$user->userId = "12345";
+$user->companyId = "67890"; // If set, associate user with a company object
+$user->campaign = $campaign;
+$user->metadata = $metadata;
+
+$apiClient->updateUser($user);
 ```
 
 ## Update Users in Batch
@@ -172,14 +178,13 @@ Only the `user_id` field is required.
 For details, visit the [PHP API Reference](https://www.moesif.com/docs/api?php#update-users-in-batch).
 
 ```php
-use MoesifApi\MoesifApiClient;
-$client = new MoesifApiClient("Your Moesif Application Id");
-$api = $client->getApi();
+<?php
+// Depending on your project setup, you might need to include composer's
+// autoloader in your PHP code to enable autoloading of classes.
+require_once "vendor/autoload.php";
 
-$userA = new Models\UserModel();
-$userA->userId = "12345";
-$userA->companyId = "67890"; // If set, associate user with a company object
-$userA->campaign = $campaign;
+use MoesifApi\MoesifApiClient;
+$apiClient = new MoesifApiClient("YOUR_COLLECTOR_APPLICATION_ID")->getApi();
 
 // metadata can be any custom object
 $userA->metadata = array(
@@ -194,8 +199,33 @@ $userA->metadata = array(
         )
     );
 
-$users = array($userA)
-$api->updateUsersBatch($user);
+$userA = new Models\UserModel();
+$userA->userId = "12345";
+$userA->companyId = "67890"; // If set, associate user with a company object
+$userA->campaign = $campaign;
+$userA->metadata = $metadata;
+
+// metadata can be any custom object
+$userB->metadata = array(
+        "email" => "mary@acmeinc.com",
+        "first_name" => "Mary",
+        "last_name" => "Jane",
+        "title" => "Software Engineer",
+        "sales_info" => array(
+            "stage" => "Customer",
+            "lifetime_value" => 24000,
+            "account_owner" => "mary@contoso.com"
+        )
+    );
+
+$userB = new Models\UserModel();
+$userB->userId = "12345";
+$userB->companyId = "67890"; // If set, associate user with a company object
+$userB->campaign = $campaign;
+$userB->metadata = $metadata;
+
+$users = array($userA, $userB)
+$apiClient->updateUsersBatch($user);
 ```
 
 ## Update a Single Company
@@ -206,9 +236,14 @@ Only the `company_id` field is required.
 For details, visit the [PHP API Reference](https://www.moesif.com/docs/api?php#update-a-company).
 
 ```php
+<?php
+// Depending on your project setup, you might need to include composer's
+// autoloader in your PHP code to enable autoloading of classes.
+
+require_once "vendor/autoload.php";
+
 use MoesifApi\MoesifApiClient;
-$client = new MoesifApiClient("Your Moesif Application Id");
-$api = $client->getApi();
+$apiClient = new MoesifApiClient("YOUR_COLLECTOR_APPLICATION_ID")->getApi();
 
 // Campaign object is optional, but useful if you want to track ROI of acquisition channels
 // See https://www.moesif.com/docs/api#update-a-company for campaign schema
@@ -218,6 +253,7 @@ $campaign->utmCampaign = "cpc";
 $campaign->utmMedium = "adwords";
 $campaign->utmContent = "api+tooling";
 $campaign->utmTerm = "landing";
+
 
 $company = new Models\CompanyModel();
 $company->companyId = "67890";
@@ -236,7 +272,7 @@ $company->metadata = array(
         )
     );
 
-$api->updateCompany($company);
+$apiClient->updateCompany($company);
 ```
 
 ## Update Companies in Batch
@@ -246,9 +282,24 @@ Only the `company_id` field is required.
 For details, visit the [PHP API Reference](https://www.moesif.com/docs/api?php#update-companies-in-batch).
 
 ```php
+<?php
+// Depending on your project setup, you might need to include composer's
+// autoloader in your PHP code to enable autoloading of classes.
+
+require_once "vendor/autoload.php";
+
 use MoesifApi\MoesifApiClient;
-$client = new MoesifApiClient("Your Moesif Application Id");
-$api = $client->getApi();
+$apiClient = new MoesifApiClient("YOUR_COLLECTOR_APPLICATION_ID")->getApi();
+
+// Campaign object is optional, but useful if you want to track ROI of acquisition channels
+// See https://www.moesif.com/docs/api#update-a-company for campaign schema
+$campaignA = new Models\CampaignModel();
+$campaignA->utmSource = "google";
+$campaignA->utmCampaign = "cpc";
+$campaignA->utmMedium = "adwords";
+$campaignA->utmContent = "api+tooling";
+$campaignA->utmTerm = "landing";
+
 
 $companyA = new Models\CompanyModel();
 $companyA->companyId = "67890";
@@ -256,7 +307,7 @@ $companyA->companyDomain = "acmeinc.com";
 $companyA->campaign = $campaign;
 
 // metadata can be any custom object
-$companyA->metadata = array(
+$companyB->metadata = array(
         "org_name" => "Acme, Inc",
         "plan_name" => "Free",
         "deal_stage" => "Lead",
@@ -267,8 +318,25 @@ $companyA->metadata = array(
         )
     );
 
-$companies = array($companyA)
-$api->updateCompaniesBatch($companies);
+$companyB = new Models\CompanyModel();
+$companyB->companyId = "67890";
+$companyB->companyDomain = "acmeinc.com";
+$companyB->campaign = $campaign;
+
+// metadata can be any custom object
+$companyB->metadata = array(
+        "org_name" => "Acme, Inc",
+        "plan_name" => "Free",
+        "deal_stage" => "Lead",
+        "mrr" => 24000,
+        "demographics" => array(
+            "alexa_ranking" => 500000,
+            "employee_count" => 47
+        )
+    );
+
+$companies = array($companyA, $companyB)
+$apiClient->updateCompaniesBatch(array($companies));
 ```
 
 ## An Example Symfony 1.4 App with Moesif Integrated
