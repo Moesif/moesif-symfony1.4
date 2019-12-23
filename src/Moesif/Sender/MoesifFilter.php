@@ -360,6 +360,9 @@ protected function ensureString($item) {
       $response->setHttpHeader('X-Moesif-Transaction-Id', $transactionId);
     }
 
+    $data['direction'] = "Incoming";
+    $data['weight'] = 1;
+
     // Send Event to Moesif
     $moesifApi =  new MoesifApi($applicationId, ['fork'=>true, 'debug'=>$debug]);
     $moesifApi->track($data);
