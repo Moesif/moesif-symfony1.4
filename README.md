@@ -1,4 +1,4 @@
-## Moesif Symfony 1.4 SDK
+# Moesif Symfony 1.4 SDK
 
 Official SDK for PHP Symfony 1.x to automatically capture API traffic and send to the Moesif API Analytics platform.
 
@@ -16,6 +16,7 @@ Via Composer
 ```bash
 $ composer require moesif/moesif-symfony1.4
 ```
+
 or add `moesif/moesif-symfony1.4` to your composer.json file accordingly.
 
 ## How to enable MoesifFilter
@@ -47,12 +48,11 @@ class MyCustomFilter extends MoesifFilter {
 }
 ```
 
-
 Add your filter to the `config/filters.yml` file in your application with
 your Moesif Application Id.
 
 ```yaml
-MyCustomFilter:  
+MyCustomFilter:
   class: MyCustomFilter
   param:
     applicationId: Your Moesif Application Id
@@ -61,71 +61,83 @@ MyCustomFilter:
 ```
 
 Your Moesif Application Id can be found in the [_Moesif Portal_](https://www.moesif.com/).
-After signing up for a Moesif account, your Moesif Application Id will be displayed during the onboarding steps. 
+After signing up for a Moesif account, your Moesif Application Id will be displayed during the onboarding steps.
 
-You can always find your Moesif Application Id at any time by logging 
+You can always find your Moesif Application Id at any time by logging
 into the [_Moesif Portal_](https://www.moesif.com/), click on the top right menu,
 and then clicking _Installation_.
 
 ## YAML Configuration Options
 
-#### __`applicationId`__
+### __`applicationId`__
+
 Type: `String`
 Required, a string that identifies your application.
 
-#### __`debug`__
+### __`debug`__
+
 Type: `Boolean`
 Optional, If true, will print debug messages using [sfFileLogger](http://www.symfony-project.org/api/1_4/sfFileLogger.html)
 
-#### __`logBody`__
+### __`logBody`__
+
 Type: `Boolean`
 Optional, Default true, Set to false to remove logging request and response body to Moesif.
 
 ## Filter Class Configuration Options
 
-#### __`identifyUserId`__
+### __`identifyUserId`__
+
 Type: `($request, $response) => String`
 Optional, a function that takes a $request and $response and return a string for userId. This enables Moesif to attribute API requests to individual unique users so you can understand who calling your API. This can be used simultaneously with `identifyCompanyId` to track both individual customers and also the companies they are a part of.
 
-#### __`identifyCompanyId`__
+### __`identifyCompanyId`__
+
 Type: `($request, $response) => String`
 Optional, a function that takes a $request and $response and return a string for companyId. If your business is B2B, this enables Moesif to attribute API requests to specific companies or organizations so you can understand which accounts are calling your API. This can be used simultaneously with `identifyUserId` to track both individual customers and the companies their a part of.
 
-#### __`identifySessionToken`__
+### __`identifySessionToken`__
+
 Type: `($request, $response) => String`
 Optional, a function that takes a $request and $response and return a string for session token/auth token. Moesif automatically sessionizes by processing your API data, but you can override this via identifySessionId if you're not happy with the results.
 
-#### __`maskRequestHeaders`__
+### __`maskRequestHeaders`__
+
 Type: `$headers => $headers`
 Optional, a function that takes a $headers, which is an associative array, and
 returns an associative array with your sensitive headers removed/masked.
 
-#### __`maskRequestBody`__
+### __`maskRequestBody`__
+
 Type: `$body => $body`
 Optional, a function that takes a $body, which is an associative array representation of JSON, and
 returns an associative array with any information removed.
 
-#### __`maskResponseHeaders`__
+### __`maskResponseHeaders`__
+
 Type: `$headers => $headers`
 Optional, same as above, but for Responses.
 
-#### __`maskResponseBody`__
+### __`maskResponseBody`__
+
 Type: `$body => $body`
 Optional, same as above, but for Responses.
 
-#### __`getMetadata`__
+### __`getMetadata`__
+
 Type: `($request, $response) => Associative Array`
 Optional, a function that takes a $request and $response and returns $metdata which is an associative array representation of JSON.
 
-#### __`skip`__
+### __`skip`__
+
 Type: `($request, $response) => String`
 Optional, a function that takes a $request and $response and returns true if this API call should be not be sent to Moesif.
 
-**The below methods to update user and company are accessible via the Moesif PHP API lib which Moesif Play Filter already imports as a dependency.**
+__The below methods to update user and company are accessible via the Moesif PHP API lib which Moesif Play Filter already imports as a dependency.__
 
 ## Update a Single User
 
-Create or update a user profile in Moesif. 
+Create or update a user profile in Moesif.
 The metadata field can be any customer demographic or other info you want to store.
 Only the `user_id` field is required.
 For details, visit the [PHP API Reference](https://www.moesif.com/docs/api?php#update-a-user).
@@ -173,7 +185,7 @@ $apiClient->updateUser($user);
 
 ## Update Users in Batch
 
-Similar to updateUser, but used to update a list of users in one batch. 
+Similar to updateUser, but used to update a list of users in one batch.
 Only the `user_id` field is required.
 For details, visit the [PHP API Reference](https://www.moesif.com/docs/api?php#update-users-in-batch).
 
@@ -277,7 +289,7 @@ $apiClient->updateCompany($company);
 
 ## Update Companies in Batch
 
-Similar to updateCompany, but used to update a list of companies in one batch. 
+Similar to updateCompany, but used to update a list of companies in one batch.
 Only the `company_id` field is required.
 For details, visit the [PHP API Reference](https://www.moesif.com/docs/api?php#update-companies-in-batch).
 
